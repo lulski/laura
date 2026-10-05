@@ -14,8 +14,6 @@ import org.springframework.core.io.Resource;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.lulski.laura.boardgamebuddy.SpringAiBoardGameService;
 import com.lulski.laura.prompt.Question;
@@ -33,10 +31,12 @@ public class SpringAiBoardGameServiceWireMockTests {
     @BeforeEach
     public void setup() throws IOException {
         var cannedResponse = respResource.getContentAsString(Charset.defaultCharset());
-        var mapper = new ObjectMapper();
-        var responseNode = mapper.readTree(cannedResponse);
         WireMock.stubFor(
-                WireMock.post("/chat/completions").willReturn(ResponseDefinitionBuilder.okForJson(responseNode)));
+                WireMock.post("/chat/completions")
+                    .willReturn(WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(cannedResponse)));
     }
 
     @Test 
